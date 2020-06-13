@@ -1,7 +1,7 @@
 # NetworkProtocol
 Creat a new network protocol with Python-Sockets
 
-开发方向确定：具备代理功能的软件，分为服务端与客户端，实现类socks协议。
+开发方向确定：具备代理功能的软件，分为模拟服务端、代理端、客户端，实现类socks协议。
 
 服务端不使用GUI界面。
 
