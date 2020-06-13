@@ -8,4 +8,3 @@ Creat a new network protocol with Python-Sockets
 socks协议底层使用TCP作为主要协议，UDP协议可用于延迟测试和服务节点的自动选定。
 
 不设置身份认证。
-
