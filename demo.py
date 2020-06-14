@@ -1,18 +1,12 @@
-from tkinter import *
-class Application(Frame):
-    def __init__(self, master=None):
-        Frame.__init__(self, master)
-        self.pack()
-        self.createWidgets()
+from random import randint
+from simhash import hashlib
 
-    def createWidgets(self):
-        self.helloLabel = Label(self, text='Hello, world!')
-        self.helloLabel.pack()
-        self.quitButton = Button(self, text='Quit', command=self.quit)
-        self.quitButton.pack()
+class Random_Check_generate:#随机字符串生成
+    def __init__(self):
+        self.generate_int_seed=randint(2020,99999999999999999)
+        self.rand_flag=hashlib.md5(str(self.generate_int_seed).encode('utf-8'))
+    def Get_randstring(self):
+        return self.rand_flag.hexdigest()
 
-app = Application()
-# 设置窗口标题:
-app.master.title('Hello World')
-# 主消息循环:
-app.mainloop()
+E=Random_Check_generate()
+print(E.Get_randstring())
