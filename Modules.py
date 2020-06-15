@@ -1,6 +1,7 @@
 from random import randint
 from simhash import hashlib
 
+
 class Random_Check_generate:#随机字符串生成
     def __init__(self):
         self.generate_int_seed=randint(2020,99999999999999999)
@@ -8,5 +9,3 @@ class Random_Check_generate:#随机字符串生成
     def Get_randstring(self):
         return self.rand_flag.hexdigest()
 
-E=Random_Check_generate()
-print(E.Get_randstring())

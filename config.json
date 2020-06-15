@@ -1,0 +1,6 @@
+{
+    "Server_List":[
+        {"host":"xx.xx.xx.xx","port":8808},
+        {"host":"xx.xx.xx.xx","port":8777}
+    ]
+}
