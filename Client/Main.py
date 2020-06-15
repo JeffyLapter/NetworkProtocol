@@ -17,6 +17,12 @@ class Config_Loader:
         with open(path,'r') as fread:
             self.config_dict=json.load(fread)
         self.number_of_server=len(self.config_dict['Server_List'])
+    
+    def Flush_all(self,path):
+        self.config_dict={}
+        with open(path,'r') as fread:
+            self.config_dict=json.load(fread)
+        self.number_of_server=len(self.config_dict['Server_List'])
 
     def get_server_list_from_config(self):#return a Two dimensions list from config.json
         server_list=[]
@@ -80,7 +86,6 @@ Setting.add_cascade(label='代理设置',menu=ProxySetting)
 
 def Add_server():
     GLOBAL_Configuration.add_server_from_gui(1,1)
-    print(Proxymod.getvar())
 
 def Modify_server():
     GLOBAL_Configuration.modify_server_from_gui(1,1)
@@ -90,8 +95,9 @@ def Del_server():
     if confirm:
         try:
             GLOBAL_Configuration.remove_server_from_gui(1)
+            GLOBAL_Configuration.Flush_all(Config_ini_path)            
             tkinter.messagebox.showinfo(title='Success',message='所有服务器已被清空')
-        except:
+        except:    
             tkinter.messagebox.showerror(title='Error!',message='操作失败')
     else:
         pass
@@ -103,3 +109,7 @@ ProxySetting.add_cascade(label='删除所有存在的服务器',command=Del_serv
 MainWindow.config(menu=MenuBar)
 MainWindow.mainloop()
 
+'''
+要解决的问题：
+json写入，修改，自动化udp选路模块
+'''
