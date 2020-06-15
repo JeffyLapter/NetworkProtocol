@@ -1,17 +1,19 @@
 # This is the Main FILE OF client #
 from tkinter import ttk
 import tkinter as tk
+import tkinter.messagebox
 import json
 from os import system
 
 #-- global variables --#
-Config_ini_path="./config.json"
+Config_ini_path="./Client/config.json"
 FLUSH_FLAG=False
-
+auto_proxy=1
 
 class Config_Loader:
     def __init__(self,path):#path requires a Config file which defined at the begining of this file
         self.config_dict={}
+        self.auto_proxy=1
         with open(path,'r') as fread:
             self.config_dict=json.load(fread)
         self.number_of_server=len(self.config_dict['Server_List'])
@@ -62,12 +64,41 @@ Filemenu.add_cascade(label='退出',command=MainWindow.quit)
 #--设置菜单--#
 
 Setting.add_cascade(label='代理模式',menu=Proxymod)
-Proxymod.add_radiobutton(label='自动选路')
-Proxymod.add_radiobutton(label='手动模式')
+
+def USE_MANUAL_PROXY_CHANGE(config=GLOBAL_Configuration):
+    config.auto_proxy=0
+    tkinter.messagebox.showinfo(title='Success',message='切换为手动模式')
+
+def USE_AUTO_PROXY_CHANGE(config=GLOBAL_Configuration):
+    config.auto_proxy=1
+    tkinter.messagebox.showinfo(title='Success',message='切换为自动模式')
+
+Proxymod.add_radiobutton(label='自动选路',command=USE_AUTO_PROXY_CHANGE)
+Proxymod.add_radiobutton(label='手动模式',command=USE_MANUAL_PROXY_CHANGE)
+
 Setting.add_cascade(label='代理设置',menu=ProxySetting)
-ProxySetting.add_cascade(label='添加新服务器',command=GLOBAL_Configuration.add_server_from_gui)
-ProxySetting.add_cascade(label='修改服务器配置',command=GLOBAL_Configuration.add_server_from_gui)
-ProxySetting.add_cascade(label='添加新服务器',command=GLOBAL_Configuration.add_server_from_gui)
+
+def Add_server():
+    GLOBAL_Configuration.add_server_from_gui(1,1)
+    print(Proxymod.getvar())
+
+def Modify_server():
+    GLOBAL_Configuration.modify_server_from_gui(1,1)
+    
+def Del_server():
+    confirm=tkinter.messagebox.askyesno(title='警告!',message='你确定要移除所有存在的服务器么?')
+    if confirm:
+        try:
+            GLOBAL_Configuration.remove_server_from_gui(1)
+            tkinter.messagebox.showinfo(title='Success',message='所有服务器已被清空')
+        except:
+            tkinter.messagebox.showerror(title='Error!',message='操作失败')
+    else:
+        pass
+
+ProxySetting.add_cascade(label='添加新服务器',command=Add_server)
+ProxySetting.add_cascade(label='修改服务器配置',command=Modify_server)
+ProxySetting.add_cascade(label='删除所有存在的服务器',command=Del_server)
 
 MainWindow.config(menu=MenuBar)
 MainWindow.mainloop()
