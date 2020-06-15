@@ -1,6 +1,6 @@
+#用于客户端中用到的模块
 from random import randint
 from simhash import hashlib
-
 
 class Random_Check_generate:#随机字符串生成
     def __init__(self):
