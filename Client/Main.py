@@ -6,6 +6,7 @@ import tkinter.messagebox
 import tkinter.font as tkFont
 import json
 from os import system
+import C_Delay_Test
 
 #-- global variables --#
 Config_ini_path="./Client/config.json"
@@ -86,12 +87,18 @@ Proxymod.add_radiobutton(label='手动模式',command=USE_MANUAL_PROXY_CHANGE)
 
 Setting.add_cascade(label='代理设置',menu=ProxySetting)
 
-def Add_server():
-    GLOBAL_Configuration.add_server_from_gui(1,1)
+
 
 def Modify_server():
-    GLOBAL_Configuration.modify_server_from_gui(1,1)
-    
+    Proxy_Manager_Window=tk.Toplevel(MainWindow)
+    Proxy_Manager_Window.title('添加与修改服务器')
+    Proxy_Manager_Window.geometry('280x320')
+    Modify_Frame=tk.LabelFrame(Proxy_Manager_Window,text='代理服务器设置',fg='blue')
+    Modify_Frame.grid(padx=5,pady=5,sticky=tk.W)
+    Modify_introduce=tk.Label(Modify_Frame,text='添加或删除服务器')
+    Modify_introduce.grid(padx=5,pady=5,sticky=tk.W)
+    pass
+
 def Del_server():
     confirm=tkinter.messagebox.askyesno(title='警告!',message='你确定要移除所有存在的服务器么?')
     if confirm:
@@ -104,8 +111,8 @@ def Del_server():
     else:
         pass
 
-ProxySetting.add_cascade(label='添加新服务器',command=Add_server)
-ProxySetting.add_cascade(label='修改服务器配置',command=Modify_server)
+
+ProxySetting.add_cascade(label='添加与修改服务器',command=Modify_server)
 ProxySetting.add_cascade(label='删除所有存在的服务器',command=Del_server)
 
 MainWindow.config(menu=MenuBar)
@@ -138,11 +145,18 @@ for i in range(0,GLOBAL_Configuration.number_of_server):
 Server_List_Select_combox['value']=tuple(tupled_server_in_combox)
 Server_List_Select_combox.grid(column=0,row=1,padx=8,pady=4)
 
+#延迟测试
 
-Delay_Test_Button=tk.Button(Connection_Manager_Frame,text='延迟测试',font=ft,width=8,height=3,padx=4,pady=4)
+def Delay_Test():
+    print('Delay_Test')
+
+Delay_Test_Button=tk.Button(Connection_Manager_Frame,text='延迟测试',font=ft,width=8,height=3,padx=4,pady=4,command=Delay_Test)
 Delay_Test_Button.grid(column=1,row=0,rowspan=2)
 
-Connection_Button=tk.Button(Connection_Manager_Frame,text='连接',font=ft,width=8,height=3,padx=4,pady=4)
+#连接
+def Connect():
+    print('Try Connect')
+Connection_Button=tk.Button(Connection_Manager_Frame,text='连接',font=ft,width=8,height=3,padx=4,pady=4,command=Connect)
 Connection_Button.grid(column=2,row=0,rowspan=2)
 
 
@@ -174,10 +188,12 @@ record_frame.grid(column=0,padx=10,pady=3,columnspan=2,sticky='w')
 #Recording_String='sssssssssssssssssssssssss'
 #Recording_Var.set(Recording_String)
 record_Text=tk.Text(record_frame,width=48,height=12)
-#record_Text.configure(state='disabled')
+
 
 record_Text.grid(sticky='w')
 record_Text.insert(tk.END,'test')
+record_Text.configure(state='disabled')
+
 
 scroll=tk.Scrollbar(record_frame)
 scroll['command']=record_Text.yview
