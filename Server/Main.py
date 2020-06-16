@@ -114,7 +114,8 @@ serverport=int(conf['Port'])
 
 client_socket=[]    #record the opening socket
 
-#receive message from client
+############################MAIN WORK####################################
+#receive message from client 
 serverSocket = socket(AF_INET,SOCK_STREAM)
 serverSocket.bind(('',serverport))
 serverSocket.listen(5)
