@@ -97,7 +97,7 @@ FLUSH_FLAG=False
 
 def Add_Server_into_List():
     SERVER_LIST.append(remote_server_input.get())
-    global FLUSH_FLAG=True
+
 
 def UDP_Connection_Test():
     pass
