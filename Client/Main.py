@@ -21,8 +21,6 @@ class Config_Loader:
             self.config_dict=json.load(fread)
         self.number_of_server=len(self.config_dict['Server_List'])
     
-    
-
     def get_server_list_from_config(self):#return a Two dimensions list from config.json
         server_list=[]
         for i in range(0,self.number_of_server):
@@ -49,7 +47,24 @@ class Config_Loader:
 
     def add_server_from_gui(self,host_input,port_input):
         print('add_server_from_gui')
-        pass
+        temp_already=0
+        global FLUSH_FLAG
+        global Config_ini_path
+        for i in self.config_dict['Server_List']:
+            if i['host']==host_input and i['port']==port_input:
+                print('already added')
+                temp_already=1
+            else:
+                pass
+        if temp_already==0:
+            self.config_dict['Server_List'].append({'host':host_input,'port':eval(port_input)})
+            server_dict_to_json=json.dumps(self.config_dict)
+            with open(Config_ini_path,'w') as fw:
+                fw.write(server_dict_to_json)
+                fw.close()
+            FLUSH_FLAG=True
+            #print(self.config_dict['Server_List'])
+        
     
     def remove_server_from_gui(self,host_input,port_input):
         print('remove_server_from_gui')
@@ -57,7 +72,7 @@ class Config_Loader:
 
 GLOBAL_Configuration=Config_Loader(Config_ini_path)
 
-print(GLOBAL_Configuration.get_server_list_from_config())
+#print(GLOBAL_Configuration.get_server_list_from_config())
 
 
 #--GUI INIT_WINDOW--#
@@ -140,6 +155,7 @@ def Server_Chosen_Cobox():
 
 
 def Modify_server():
+    
     Proxy_Manager_Window=tk.Toplevel(MainWindow)
     Proxy_Manager_Window.title('添加与修改服务器')
     Proxy_Manager_Window.geometry('290x320')
@@ -158,13 +174,33 @@ def Modify_server():
     scroll_bar_proxy_setting.grid(column=1,sticky=tk.S+tk.W+tk.E+tk.N)
 
     Modify_List_Box.grid(padx=5,pady=5,ipadx=5,ipady=5,column=0,row=1,sticky=tk.W)
-    
+
     Modify_Button_Frame=tk.LabelFrame(Proxy_Manager_Window,text='')
     Modify_Button_Frame.grid(padx=3,pady=15,column=1,row=0,sticky=tk.W+tk.N)
 
     #-----------------add
     def Server_add():
         ADD_SERVER_WINDOW=tk.Toplevel(Proxy_Manager_Window)
+        ADD_SERVER_WINDOW.geometry('290x115')
+        ADD_SERVER_WINDOW_ENTRY_Label=tk.Label(ADD_SERVER_WINDOW,text='服务器地址:',font=ft)
+        ADD_SERVER_WINDOW_ENTRY_Label.grid(sticky=tk.W,column=0,row=0,padx=8,pady=8)
+        ADD_SERVER_WINDOW_ENTRY_HOST=tk.Entry(ADD_SERVER_WINDOW,width=21)
+        ADD_SERVER_WINDOW_ENTRY_HOST.grid(sticky=tk.W,column=1,row=0,padx=4,pady=8)
+
+        ADD_SERVER_WINDOW_ENTRY_PORT_Label=tk.Label(ADD_SERVER_WINDOW,text='端口:',font=ft)
+        ADD_SERVER_WINDOW_ENTRY_PORT_Label.grid(sticky=tk.W,column=0,row=1,padx=8,pady=4)
+        ADD_SERVER_WINDOW_ENTRY_PORT=tk.Entry(ADD_SERVER_WINDOW,width=21)
+        ADD_SERVER_WINDOW_ENTRY_PORT.grid(sticky=tk.W,column=1,row=1,padx=4,pady=4)
+        def SERVER_ADD_CONFIRM():
+            global FLUSH_FLAG
+            host=ADD_SERVER_WINDOW_ENTRY_HOST.get()
+            port=ADD_SERVER_WINDOW_ENTRY_PORT.get()
+            GLOBAL_Configuration.add_server_from_gui(host,port)
+            FLUSH_FLAG=True
+            ADD_SERVER_WINDOW.destroy()
+
+        ADD_SERVER_WINDOW_CONFIRM_BUTTON=tk.Button(ADD_SERVER_WINDOW,text='确定',width=25,command=SERVER_ADD_CONFIRM)
+        ADD_SERVER_WINDOW_CONFIRM_BUTTON.grid(sticky=tk.W+tk.E,column=0,columnspan=2,row=2,padx=14,pady=4)
         pass
 
     add_button=tk.Button(Modify_Button_Frame,text='添加',width=8,height=1,command=Server_add)
@@ -180,10 +216,15 @@ def Modify_server():
     #-----------------DEL
     def Server_del_single():
         global FLUSH_FLAG
+        global GLOBAL_Configuration
         del_chosen_now=Modify_List_Box.get(tk.ACTIVE)
-        print(del_chosen_now)
+        SERVER_SELECTED=del_chosen_now.split(':')
+        print(SERVER_SELECTED)
+        GLOBAL_Configuration.remove_server_from_gui(SERVER_SELECTED[0],SERVER_SELECTED[1])
+        #print(del_chosen_now)
         Modify_List_Box.delete(tk.ACTIVE)
 
+        
 
     del_button=tk.Button(Modify_Button_Frame,text='删除',width=8,height=1,command=Server_del_single)
     del_button.grid(padx=5,pady=5,column=0,row=2,sticky=tk.W)
@@ -191,13 +232,17 @@ def Modify_server():
     def Server_save():
         pass
 
-    save_button=tk.Button(Modify_Button_Frame,text='保存',width=8,height=1,command=Server_save)
+    save_button=tk.Button(Modify_Button_Frame,text='保存',width=8,height=1,command=Proxy_Manager_Window.destroy)
     save_button.grid(padx=5,pady=5,column=0,row=3,sticky=tk.W)
 
     
     cancle_button=tk.Button(Modify_Button_Frame,text='取消',width=8,height=1,command=Proxy_Manager_Window.destroy)
     cancle_button.grid(padx=5,pady=5,column=0,row=4,sticky=tk.W)
     pass
+
+
+
+
 
 def Del_server():
     confirm=tkinter.messagebox.askyesno(title='警告!',message='你确定要移除所有存在的服务器么?')
@@ -218,24 +263,18 @@ ProxySetting.add_cascade(label='删除所有存在的服务器',command=Del_serv
 MainWindow.config(menu=MenuBar)
 #----------------Menu bar ends--------------------#
 
-
-
-
-
-
-
-
 #延迟测试
 
 def Delay_Test():
-    print('Delay_Test')
+    print('Delay_Test:',Server_List_Select_combox.get())
 
 Delay_Test_Button=tk.Button(Connection_Manager_Frame,text='延迟测试',font=ft,width=8,height=3,padx=4,pady=4,command=Delay_Test)
 Delay_Test_Button.grid(column=1,row=0,rowspan=2)
 
 #连接
 def Connect():
-    print('Try Connect')
+    print('Try Connect:',Server_List_Select_combox.get())
+
 Connection_Button=tk.Button(Connection_Manager_Frame,text='连接',font=ft,width=8,height=3,padx=4,pady=4,command=Connect)
 Connection_Button.grid(column=2,row=0,rowspan=2)
 
@@ -250,9 +289,11 @@ Connect_Status_Lable.grid(column=0,row=0)
 
 
 Conn_status_var=tk.StringVar()
-Conn_status_var.set('    连接成功   ')
+#Conn_status_var.set('    连接成功   ')
+
+
 #Conn_status_var.set('    连接错误   ')
-#Conn_status_var.set('    未连接     ')
+Conn_status_var.set('    未连接     ')
 #Conn_status_var.set('   正在连接... ')
 Conn_label=tk.Label(Connect_Status_Frame,textvariable=Conn_status_var,font=status_ft,fg='green',padx=10)
 Conn_label.grid(column=1,row=0,sticky='w')
@@ -269,9 +310,16 @@ record_frame.grid(column=0,padx=10,pady=3,columnspan=2,sticky='w')
 #Recording_Var.set(Recording_String)
 record_Text=tk.Text(record_frame,width=48,height=12)
 
+record_Text.tag_config('error',foreground='red')
+record_Text.tag_config('warning',foreground='red')
+record_Text.tag_config('error',foreground='red')
 
 record_Text.grid(sticky='w')
-record_Text.insert(tk.END,'test')
+
+
+
+
+record_Text.insert(tk.END,'test','error')
 record_Text.configure(state='disabled')
 
 
@@ -279,9 +327,12 @@ scroll=tk.Scrollbar(record_frame)
 scroll['command']=record_Text.yview
 scroll.grid(column=1,row=0,sticky=tk.S + tk.W + tk.E + tk.N)
 
+#def Recording_Module(text,color):
+
 
 
 MainWindow.after(1000,Server_Chosen_Cobox)
+
 MainWindow.mainloop()
 
 '''

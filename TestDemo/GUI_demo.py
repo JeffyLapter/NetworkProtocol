@@ -1,13 +1,22 @@
-import tkinter as tk
-from tkinter import ttk
-from tkinter import scrolledtext
+#import tkinter as tk
+#from tkinter import ttk
+#from tkinter import scrolledtext
 #
-# import requests
+import tkinter as tk
+root=tk.Tk()
+t=tk.Text(root)
+# 创建一个TAG，其前景色为红色
+t.tag_config('a',foreground='red')
+# 使用TAG 'a'来指定文本属性
+t.insert(1.0,'0123456789','a')
+t.pack()
+root.mainloop()
 
+'''
 window=tk.Tk()
 window.title('a  window')
 window.geometry('730x300')
-
+'''
 '''
 def do_menu():
     print('selected a menu')
@@ -74,6 +83,7 @@ scr = scrolledtext.ScrolledText(labelframe, width=scrol_w, height=scrol_h, wrap=
 scr.grid(column=0, sticky='WE', columnspan=3)
 '''
 #--------tab creat
+'''
 tabcontrol=ttk.Notebook(window)
 tab1=ttk.Frame(tabcontrol)
 tabcontrol.add(tab1,text='tab1')
@@ -105,9 +115,11 @@ Add_Server_into_List_Button=ttk.Button(tab_label_A,text="添加到服务器列�
 Add_Server_into_List_Button.grid(column=1,row=1,sticky='w')
 
 
-
+'''
 '''
 but=tk.Button(window,text='延迟测试',command=pushd)
 but.pack()
 '''
+'''
 window.mainloop()
+'''
