@@ -51,7 +51,7 @@ class Config_Loader:
         global FLUSH_FLAG
         global Config_ini_path
         for i in self.config_dict['Server_List']:
-            if i['host']==host_input and i['port']==port_input:
+            if i['host']==host_input and i['port']==eval(port_input):
                 print('already added')
                 temp_already=1
             else:
@@ -67,8 +67,23 @@ class Config_Loader:
         
     
     def remove_server_from_gui(self,host_input,port_input):
-        print('remove_server_from_gui')
-        pass
+        global FLUSH_FLAG
+        global Config_ini_path
+        for i in self.config_dict['Server_List']:
+            if i['host']==host_input and i['port']==eval(port_input):
+                #print(i)
+                #print(self.config_dict['Server_List'])
+
+                self.config_dict['Server_List'].remove(i)
+                
+                print('remove_server_from_gui')
+                #print(self.config_dict['Server_List'])
+                with open(Config_ini_path,'w') as fw:
+                    fw.write(json.dumps(self.config_dict))
+                    fw.close()
+                FLUSH_FLAG=True
+            else:
+                pass
 
 GLOBAL_Configuration=Config_Loader(Config_ini_path)
 
@@ -219,7 +234,7 @@ def Modify_server():
         global GLOBAL_Configuration
         del_chosen_now=Modify_List_Box.get(tk.ACTIVE)
         SERVER_SELECTED=del_chosen_now.split(':')
-        print(SERVER_SELECTED)
+        print(SERVER_SELECTED,'-Deleted')
         GLOBAL_Configuration.remove_server_from_gui(SERVER_SELECTED[0],SERVER_SELECTED[1])
         #print(del_chosen_now)
         Modify_List_Box.delete(tk.ACTIVE)
@@ -311,17 +326,29 @@ record_frame.grid(column=0,padx=10,pady=3,columnspan=2,sticky='w')
 record_Text=tk.Text(record_frame,width=48,height=12)
 
 record_Text.tag_config('error',foreground='red')
-record_Text.tag_config('warning',foreground='red')
-record_Text.tag_config('error',foreground='red')
-
+record_Text.tag_config('warning',foreground='orange')
+record_Text.tag_config('success',foreground='green')
+record_Text.tag_config('normal',foreground='black')
+record_Text.tag_config('blue',foreground='blue')
 record_Text.grid(sticky='w')
 
 
 
 
-record_Text.insert(tk.END,'test','error')
-record_Text.configure(state='disabled')
+#record_Text.insert(tk.END,'test','green')
 
+#record_Text.configure(state='disabled')
+
+def Recording_Insertion(text,_type):
+    global record_Text
+    record_Text.configure(state=tk.NORMAL)
+    record_Text.insert(tk.END,text,_type)
+    record_Text.insert(tk.END,'\n',_type)
+    record_Text.configure(state='disabled')
+    
+Recording_Insertion('hello','error')
+Recording_Insertion('test','blue')
+Recording_Insertion('huge_test','success')
 
 scroll=tk.Scrollbar(record_frame)
 scroll['command']=record_Text.yview
