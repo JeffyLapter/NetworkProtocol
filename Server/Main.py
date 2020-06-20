@@ -55,7 +55,7 @@ class Proxy:
         self.clientSocket.send(request)
         print('The message from ',self.id,' sends to destination...')
         response=self.clientSocket.recv(1024)
-        print('The message has been responsed, it will be transmited.')
+        print('The message from ',self.id,' has been responsed, it will be transmited.')
         return response
 
 class Proxy_Response:
@@ -154,11 +154,11 @@ while True:
                     connectionSocket.send(res.number+res.message+res.des_ip+res.des_port)
                     del res
 
-     if message[0:2]=='10':     #send message
+     if message[0:2]=='10':     #send response to C
         for i in client_socket:
             if i.id == md5(message[5:101]):
                 res_message = i.send_information(message[101:])
-                res = Proxy_Response('10',con.req_message[2:],con.des_ip,con.des_port)
+                res = Proxy_Response('10','10',con.des_ip,con.des_port)
                 connectionSocket.send(res.number+res.message+res.des_ip+res.des_port+res_message)
 
 
