@@ -8,6 +8,8 @@ import json
 from os import system
 from C_Modules import Delay_Test_Module
 
+import Proxy
+
 #-- global variables --#
 Config_ini_path="./Client/config.json"
 FLUSH_FLAG=False
@@ -342,6 +344,7 @@ Delay_Test_Button.grid(column=1,row=0,rowspan=2)
 
 
 def Connect():
+    import Proxy
     global CONNECT_STATUS
     global auto_proxy
     TARGET=Delay_Test()
@@ -351,11 +354,15 @@ def Connect():
     
     
     Recording_Insertion('Try Connect:'+targetip+':'+str(targetport)+'\n','blue')
-    #success
-    CONNECT_STATUS = 1
+    f=Proxy.work(targetip,int(targetport))
 
-    #failed
-    #CONNECT_STATUS = -1
+    #falied
+    if f==-1:
+        CONNECT_STATUS = -1
+
+    #success
+    #else:
+    #    CONNECT_STATUS = 1
 
 
 
