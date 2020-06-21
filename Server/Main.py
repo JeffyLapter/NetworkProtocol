@@ -27,29 +27,29 @@ class Proxy:
                 self.clientSocket.connect((self.des_ip,self.des_port))
              except Exception:
                 self.req_message = '0b001'
-                print(time.asctime('[',time.localtime(time.time())),'] ','id: ',self.id,'   ','Connection Error.')
+                print('[',time.asctime(time.localtime(time.time())),'] ','id: ',self.id,'   ','Connection Error.')
              else:
                 self.req_message = '0b000'
-                print(time.asctime('[',time.localtime(time.time())),'] ','id: ',self.id,'   ','Connection OK!')
+                print('[',time.asctime(time.localtime(time.time())),'] ','id: ',self.id,'   ','Connection OK!')
         #UDP connection
          elif self.type=='001':  
              try:
                 self.clientSocket = socket(AF_INET, SOCK_DGRAM)
              except Exception:
                 self.req_message = '0b001'
-                print(time.asctime('[',time.localtime(time.time())),'] ','id: ',self.id,'   ','Connection Error.')
+                print('[',time.asctime(time.localtime(time.time())),'] ','id: ',self.id,'   ','Connection Error.')
              else:
                 self.req_message = '0b000'
-                print(time.asctime('[',time.localtime(time.time())),'] ','id: ',self.id,'   ','Connection OK!')
+                print('[',time.asctime(time.localtime(time.time())),'] ','id: ',self.id,'   ','Connection OK!')
     def disconncet(self):
         try:
             self.clientSocket.close()
         except Exception:
             self.req_message = '0b101'
-            print(time.asctime('[',time.localtime(time.time())),'] ','id: ',self.id,'   ','Disconnection Error.')
+            print('[',time.asctime(time.localtime(time.time())),'] ','id: ',self.id,'   ','Disconnection Error.')
         else:
             self.req_message = '0b100'
-            print(time.asctime('[',time.localtime(time.time())),'] ','id: ',self.id,'   ','Disconnection OK!')
+            print('[',time.asctime(time.localtime(time.time())),'] ','id: ',self.id,'   ','Disconnection OK!')
 
     def send_information(self,request):
         self.clientSocket.send(request)
