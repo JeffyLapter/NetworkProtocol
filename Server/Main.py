@@ -120,7 +120,15 @@ BUFSIZE = 1024
 ADDR = (HOST, PORT)
 udpSerSock = socket(AF_INET, SOCK_DGRAM)
 udpSerSock.bind(ADDR)
-
+while True:
+    print('waiting for message...')
+    data, addr = udpSerSock.recvfrom(BUFSIZE)
+    if data:
+        rpldata=bytes('AAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+        udpSerSock.sendto(rpldata, addr)
+        print('received from %s >> %s' % (addr, data))
+        break
+udpSerSock.close()
 
 
 ############################Connection Contribute####################################
@@ -132,12 +140,6 @@ serverSocket.listen(5)
 
 #analysis message and send response to client
 while True:
-    print('waiting for message...')
-    data, addr = udpSerSock.recvfrom(BUFSIZE)
-    rpldata=bytes('AAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
-    udpSerSock.sendto(rpldata, addr)
-    print('received from %s >> %s' % (addr, data))
-    
     message = ''
     connectionSocket,addr = serverSocket.accept()     
     message = connectionSocket.recv(1024) 
