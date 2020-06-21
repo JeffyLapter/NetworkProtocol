@@ -21,18 +21,18 @@ class Delay_Test_Module:
     
     def UDP_AVG_RTT(self):
         Total_time=0.0
-        for i in range(10):
+        for i in range(1):
             data=bytes(self.Get_randstring(),encoding='utf-8')
             start_time=time.time()
             try:
                 self.udpClientSock.sendto(data,self.ADDR)
                 data,self.ADDR=self.udpClientSock.recvfrom(self.Buffer_Size)
             except:
-                return -1
+                pass
             end_time=time.time()
             use_time_single=(end_time-start_time)*1000
             Total_time+=use_time_single
-        self.RTT=Total_time/10.0/2.0
+        self.RTT=Total_time/1/2.0
         return self.RTT
     
 #TEST=Delay_Test_Module('39.106.97.149',8777)

@@ -114,7 +114,8 @@ serverport=int(conf['Port'])
 
 client_socket=[]    #record the opening socket
 ##########################UDP Delay_Response##########################################
-HOST = '0.0.0.0'
+
+'''HOST = '0.0.0.0'
 PORT = serverport
 BUFSIZE = 1024
 ADDR = (HOST, PORT)
@@ -129,7 +130,7 @@ while True:
         print('received from %s >> %s' % (addr, data))
         break
 udpSerSock.close()
-
+'''
 
 ############################Connection Contribute####################################
 
