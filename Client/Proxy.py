@@ -1,5 +1,6 @@
 from socket import *
 import time
+from Main import Recording_Insertion
 class Client_Request:
     def __init__(self,f,con_type,client_ip,client_port,des_ip,des_port):
         self.f = f
@@ -62,7 +63,7 @@ def str_to_bin_port(str_port):
 
 #请求代理连接
 def connect(clientSocket,information):
-    from Main import Recording_Insertion
+    #from Main import Recording_Insertion
     try:
         clientSocket.bind((information.client_ip,information.client_port))
         clientSocket.connect((information.proxy_server,information.proxy_port))
@@ -77,7 +78,7 @@ def connect(clientSocket,information):
 
 #接收代理响应信息
 def receive(clientSocket):
-    from Main import Recording_Insertion
+    #from Main import Recording_Insertion
     res_message = clientSocket.recv(53)
     res = Proxy_Response(res_message)
     if res.type=='000':
@@ -91,7 +92,7 @@ def receive(clientSocket):
     return res.type
 #send message
 def send_message(clientSocket,information):
-    from Main import Recording_Insertion
+    #from Main import Recording_Insertion
     Recording_Insertion('Please enter the script input test statement, the target server will automatically convert to uppercase...\n','blue')
     req = Client_Request('10',information.con_type,information.client_ip,information.client_port,information.des_ip,information.des_port)
     message = req.f+req.con_type+req.client_ip+req.client_port+req.des_ip+req.des_port
@@ -106,7 +107,7 @@ def send_message(clientSocket,information):
             print('From Server:', modifiedSentence[53:].decode())
 #关闭代理
 def disconnect(clientSocket,information):
-    from Main import Recording_Insertion
+    #from Main import Recording_Insertion
     req = Client_Request('01',information.con_type,information.client_ip,information.client_port,information.des_ip,information.des_port)
     message = req.f+req.con_type+req.client_ip+req.client_port+req.des_ip+req.des_port
     clientSocket.send(message)
@@ -123,7 +124,7 @@ def disconnect(clientSocket,information):
 
 #
 def work(proxy_server,proxy_port):
-    from Main import Recording_Insertion
+    #
     # proxy_server = ''
     # proxy_port = 1234
     client_name = getfqdn(gethostname())

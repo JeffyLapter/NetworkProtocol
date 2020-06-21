@@ -106,8 +106,8 @@ def str_to_bin_port(str_port):
     return b_port
 
 # ****************config server********************
-Config_ini_path="./Server/config.json"
-with open('Config_ini_path', 'r') as f:
+Config_ini_path="./config.json"
+with open(Config_ini_path, 'r') as f:
     conf = json.load(f)    
 serverport=int(conf['Port'])
 # *************************************************
@@ -120,13 +120,7 @@ BUFSIZE = 1024
 ADDR = (HOST, PORT)
 udpSerSock = socket(AF_INET, SOCK_DGRAM)
 udpSerSock.bind(ADDR)
-while True:
-    print('waiting for message...')
-    data, addr = udpSerSock.recvfrom(BUFSIZE)
-    rpldata=bytes('ACCEPT [%s] %s' % (time.ctime(), data),encoding='utf-8')
-    udpSerSock.sendto(rpldata, addr)
-    print('received from %s >> %s' % (addr, data))
-udpSerSock.close()
+
 
 
 ############################Connection Contribute####################################
@@ -138,11 +132,17 @@ serverSocket.listen(5)
 
 #analysis message and send response to client
 while True:
-     message = ''
-     connectionSocket,addr = serverSocket.accept()     
-     message = connectionSocket.recv(1024) 
+    print('waiting for message...')
+    data, addr = udpSerSock.recvfrom(BUFSIZE)
+    rpldata=bytes('AAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+    udpSerSock.sendto(rpldata, addr)
+    print('received from %s >> %s' % (addr, data))
+    
+    message = ''
+    connectionSocket,addr = serverSocket.accept()     
+    message = connectionSocket.recv(1024) 
 
-     if message[0:2]=='00':        #connect
+    if message[0:2]=='00':        #connect
         req = Proxy_Request(message)
 
         con = Proxy(md5(message[5:101]), req.type, req.client_ip, req.client_port, req.des_ip, req.des_port)
@@ -155,7 +155,7 @@ while True:
         del req
         del res
 
-     if message[0:2]=='01':        #disconnect
+    if message[0:2]=='01':        #disconnect
         for i in client_socket:
             if i.id == md5(message[5:101]):
                 i.disconncet()
@@ -170,7 +170,7 @@ while True:
                     connectionSocket.send(res.number+res.message+res.des_ip+res.des_port)
                     del res
 
-     if message[0:2]=='10':     #send response to C
+    if message[0:2]=='10':     #send response to C
         for i in client_socket:
             if i.id == md5(message[5:101]):
                 res_message = i.send_information(message[101:])
