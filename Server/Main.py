@@ -4,59 +4,14 @@ from hashlib import *
 import time
 class Proxy:
     def __init__(self,*args):
-        if len(args)==0:
-            self.id = '0'
-            self.type = ''
-            self.client_ip = 'X.X.X.X'
-            self.client_port = 0
-            self.des_ip = 'X.X.X.X'
-            self.des_port = 0
-        else:
-            self.id = args[0]
-            self.type = args[1]
-            self.client_ip = args[2]
-            self.client_port = args[3]
-            self.des_ip = args[4]
-            self.des_port = args[5]
-    
-    def connect(self):
-        #TCP connection
-         if self.type=='000':    
-             try:
-                self.clientSocket = socket(AF_INET, SOCK_STREAM)
-                self.clientSocket.connect((self.des_ip,self.des_port))
-             except Exception:
-                self.req_message = '0b001'
-                print('[',time.asctime(time.localtime(time.time())),'] ','id: ',self.id,'   ','Connection Error.')
-             else:
-                self.req_message = '0b000'
-                print('[',time.asctime(time.localtime(time.time())),'] ','id: ',self.id,'   ','Connection OK!')
-        #UDP connection
-         elif self.type=='001':  
-             try:
-                self.clientSocket = socket(AF_INET, SOCK_DGRAM)
-             except Exception:
-                self.req_message = '0b001'
-                print('[',time.asctime(time.localtime(time.time())),'] ','id: ',self.id,'   ','Connection Error.')
-             else:
-                self.req_message = '0b000'
-                print('[',time.asctime(time.localtime(time.time())),'] ','id: ',self.id,'   ','Connection OK!')
-    def disconncet(self):
-        try:
-            self.clientSocket.close()
-        except Exception:
-            self.req_message = '0b101'
-            print('[',time.asctime(time.localtime(time.time())),'] ','id: ',self.id,'   ','Disconnection Error.')
-        else:
-            self.req_message = '0b100'
-            print('[',time.asctime(time.localtime(time.time())),'] ','id: ',self.id,'   ','Disconnection OK!')
+        self.id = args[0]
+        self.type = args[1]
+        self.client_ip = args[2]
+        self.client_port = args[3]
+        self.des_ip = args[4]
+        self.des_port = args[5]            
+        self.flag = -1
 
-    def send_information(self,request):
-        self.clientSocket.send(request)
-        print('The message from ',self.id,' sends to destination...')
-        response=self.clientSocket.recv(1024)
-        print('The message from ',self.id,' has been responsed, it will be transmited.')
-        return response
 
 class Proxy_Response:
     def __init__(self,num,message,des_ip,des_port):
@@ -88,7 +43,8 @@ def bin_to_str_ip(b_ip):
 
 def bin_to_str_port(b_port):
     str_port='0b'+b_port
-    return int(str_port,2)
+    x=int(str_port,2)
+    return x
 
 def str_to_bin_ip(str_ip):
     f=''
@@ -97,19 +53,34 @@ def str_to_bin_ip(str_ip):
         if i!='.':
             f=f+i
         else:
-            b_ip=b_ip+'{:08b}'.format(int(f))
+            b_ip=b_ip+bin(int(f))[2:].zfill(8)
             f=''
+    b_ip=b_ip+bin(int(f))[2:].zfill(8)
     return b_ip
 
 def str_to_bin_port(str_port):
     b_port='{:016b}'.format(int(str_port))
     return b_port
 
+def send_information(i,message):
+    if i.flag==1:
+            tcpSocket.send(message.encode())
+            print('The message from ',i.id,' sends to destination...')
+            response=tcpSocket.recv(1024).decode()
+            print('The message from ',i.id,' has been responsed, it will be transmited.')
+            return response
+    elif i.flag==0:
+            udpSocket.send(message.encode())
+            print('The message from ',i.id,' sends to destination...')
+            response=udpSocket.recv(1024).decode()
+            print('The message from ',i.id,' has been responsed, it will be transmited.')
+            return response
 # ****************config server********************
 Config_ini_path="./config.json"
-with open(Config_ini_path, 'r') as f:
-    conf = json.load(f)    
-serverport=int(conf['Port'])
+#with open(Config_ini_path, 'r') as f:
+    #conf = json.load(f)    
+#serverport=int(conf['Port'])
+serverport=8877
 # *************************************************
 
 client_socket=[]    #record the opening socket
@@ -138,46 +109,86 @@ udpSerSock.close()
 serverSocket = socket(AF_INET,SOCK_STREAM)
 serverSocket.bind(('',serverport))
 serverSocket.listen(5)
+tcpSocket = socket(AF_INET,SOCK_STREAM)
+udpSocket = socket(AF_INET, SOCK_DGRAM)
+connectionSocket,addr = serverSocket.accept()
 
 #analysis message and send response to client
 while True:
-    message = ''
-    connectionSocket,addr = serverSocket.accept()     
-    message = connectionSocket.recv(1024) 
+    message = ''     
+    message = connectionSocket.recv(1024).decode()
+   # tcpSocket = socket(AF_INET, SOCK_STREAM)
+    #udpSocket = socket(AF_INET, SOCK_DGRAM)
 
     if message[0:2]=='00':        #connect
         req = Proxy_Request(message)
-
-        con = Proxy(md5(message[5:101]), req.type, req.client_ip, req.client_port, req.des_ip, req.des_port)
+       
+        con = Proxy(md5(message[5:101].encode()), req.type, req.client_ip, req.client_port, req.des_ip, req.des_port)
         client_socket.append(con)
-        con.connect()
+        #print(client_socket[0].id)
+        if con.type=='000':    
+             try:
+                print(con.des_ip,con.des_port,type(con.des_port)) 
+                tcpSocket.connect((con.des_ip,con.des_port))
+             except Exception:
+                con.req_message = '001'
+                print('[',time.asctime(time.localtime(time.time())),'] ','id: ',con.id,'   ','Connection Error.')
+             else:
+                con.req_message = '000'
+                con.flag = 1
+                print('[',time.asctime(time.localtime(time.time())),'] ','id: ',con.id,'   ','Connection OK!')
+        #UDP connection
+        elif con.type=='001':  
+            con.req_message = '000'
+            con.flag = 0
+            print('[',time.asctime(time.localtime(time.time())),'] ','id: ',con.id,'   ','Working...')
             
-        res = Proxy_Response('00',con.req_message[2:],con.des_ip,con.des_port)
-        connectionSocket.send(res.number+res.message+res.des_ip+res.des_port)
+        res = Proxy_Response('00',con.req_message,con.des_ip,con.des_port)
+        res_mes = res.number+res.message+res.des_ip+res.des_port
+        connectionSocket.send(res_mes.encode())
 
         del req
         del res
 
     if message[0:2]=='01':        #disconnect
-        for i in client_socket:
-            if i.id == md5(message[5:101]):
-                i.disconncet()
-                if i.req_message=='0b100':
-                    res = Proxy_Response('01',i.req_message[2:],i.des_ip,i.des_port)
-                    connectionSocket.send(res.number+res.message+res.des_ip+res.des_port)
-                    del i
-                    del client_socket[client_socket.index(i)]
-                    del res
+       # for i in client_socket:
+          #  print(i.id,'\n',md5(message[5:101].encode()))
+           # if i.id == md5(message[5:101].encode()):
+                try:
+                    if con.flag==1:
+                        tcpSocket.close()
+                    else:    
+                        udpSocket.close()
+                except Exception:
+                    con.req_message = '101'
+                    print('[',time.asctime(time.localtime(time.time())),'] ','id: ',con.id,'   ','Disconnection Error.')
                 else:
-                    res = Proxy_Response('01',i.req_message[2:],i.des_ip,i.des_port)
-                    connectionSocket.send(res.number+res.message+res.des_ip+res.des_port)
+                    con.req_message = '100'
+                    print('[',time.asctime(time.localtime(time.time())),'] ','id: ',con.id,'   ','Disconnection OK!')
+                if con.req_message=='100':
+                    res = Proxy_Response('01',con.req_message,con.des_ip,con.des_port)
+                    res_mes = res.number+res.message+res.des_ip+res.des_port
+                    connectionSocket.send(res_mes.encode())
+                    connectionSocket.close()
+                    del con
+                   # del client_socket[client_socket.index(i)]
+                    del res
+                    break
+                else:
+                    res = Proxy_Response('01',con.req_message[2:],con.des_ip,con.des_port)
+                    res_mes = res.number+res.message+res.des_ip+res.des_port
+                    connectionSocket.send(res_mes.encode())
                     del res
 
     if message[0:2]=='10':     #send response to C
-        for i in client_socket:
-            if i.id == md5(message[5:101]):
-                res_message = i.send_information(message[101:])
-                res = Proxy_Response('10','10',con.des_ip,con.des_port)
-                connectionSocket.send(res.number+res.message+res.des_ip+res.des_port+res_message)
+      #  for i in client_socket:
+           
+          #  if i.id == md5(message[5:101].encode()):
+                #print(message[101:])
+                res_message = send_information(con,message[101:])
+                res = Proxy_Response('10','010',con.des_ip,con.des_port)
+                res_mes = res.number+res.message+res.des_ip+res.des_port+res_message
+                connectionSocket.send(res_mes.encode())
+
 
 
