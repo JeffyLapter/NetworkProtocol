@@ -503,7 +503,6 @@ Delay_Test_Button.grid(column=1,row=0,rowspan=2)
 
 
 def Connect():
-    import Proxy
     global CONNECT_STATUS
     global auto_proxy
     TARGET=Delay_Test()

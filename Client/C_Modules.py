@@ -28,7 +28,7 @@ class Delay_Test_Module:
                 self.udpClientSock.sendto(data,self.ADDR)
                 data,self.ADDR=self.udpClientSock.recvfrom(self.Buffer_Size)
             except:
-                pass
+                return -1
             end_time=time.time()
             use_time_single=(end_time-start_time)*1000
             Total_time+=use_time_single
