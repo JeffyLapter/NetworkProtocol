@@ -1,28 +1,40 @@
 #用于客户端中用到的模块
 from random import randint
 from simhash import hashlib
-import json
+from socket import *
+import time
 
-class Random_Check_generate:#随机字符串生成
-    def __init__(self):
+
+class Delay_Test_Module:
+    def __init__(self,host,port):
         self.generate_int_seed=randint(2020,99999999999999999)
         self.rand_flag=hashlib.md5(str(self.generate_int_seed).encode('utf-8'))
+        self.host=host
+        self.port=port
+        self.ADDR=(host,port)
+        self.Buffer_Size=1024
+        self.udpClientSock=socket(AF_INET,SOCK_DGRAM)
+        self.udpClientSock.settimeout(1)
+        self.RTT=0.0
     def Get_randstring(self):
         return self.rand_flag.hexdigest()
-
-
-
-
-conf={}
-with open('./Client/config.json','r') as f:
-    conf=json.load(f)
-
-conf['Server_List'].append({'host':'255.225.122.102','port':8777})
-for i in conf['Server_List']:
-    print(i['host']+':'+i['port'])
-print(conf)
     
-#    for i in range(0,2):
-#        print(e['Server_List'][i]['host']+':'+str(e['Server_List'][i]['port']))
-
-#mm=[['125.55.4.222', 8808], ['125.55.4.222', 8808]]
+    def UDP_AVG_RTT(self):
+        Total_time=0.0
+        for i in range(10):
+            data=bytes(self.Get_randstring(),encoding='utf-8')
+            start_time=time.time()
+            try:
+                self.udpClientSock.sendto(data,self.ADDR)
+                data,self.ADDR=self.udpClientSock.recvfrom(self.Buffer_Size)
+            except:
+                return -1
+            end_time=time.time()
+            use_time_single=(end_time-start_time)*1000
+            Total_time+=use_time_single
+        self.RTT=Total_time/10.0/2.0
+        return self.RTT
+    
+#TEST=Delay_Test_Module('39.106.97.149',8777)
+#print(TEST.UDP_AVG_RTT())
+            

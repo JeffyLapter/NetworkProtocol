@@ -6,11 +6,12 @@ import tkinter.messagebox
 import tkinter.font as tkFont
 import json
 from os import system
-import C_Delay_Test
+from C_Modules import Delay_Test_Module
 
 #-- global variables --#
 Config_ini_path="./Client/config.json"
 FLUSH_FLAG=False
+CONNECT_STATUS=0
 auto_proxy=1
 
 class Config_Loader:
@@ -87,6 +88,7 @@ class Config_Loader:
 
 GLOBAL_Configuration=Config_Loader(Config_ini_path)
 
+
 #print(GLOBAL_Configuration.get_server_list_from_config())
 
 
@@ -120,12 +122,14 @@ Filemenu.add_cascade(label='退出',command=MainWindow.quit)
 
 Setting.add_cascade(label='代理模式',menu=Proxymod)
 
-def USE_MANUAL_PROXY_CHANGE(config=GLOBAL_Configuration):
-    config.auto_proxy=0
+def USE_MANUAL_PROXY_CHANGE():
+    global auto_proxy
+    auto_proxy=0
     tkinter.messagebox.showinfo(title='Success',message='切换为手动模式')
 
-def USE_AUTO_PROXY_CHANGE(config=GLOBAL_Configuration):
-    config.auto_proxy=1
+def USE_AUTO_PROXY_CHANGE():
+    global auto_proxy
+    auto_proxy=1
     tkinter.messagebox.showinfo(title='Success',message='切换为自动模式')
 
 Proxymod.add_radiobutton(label='自动选路',command=USE_AUTO_PROXY_CHANGE)
@@ -280,18 +284,58 @@ MainWindow.config(menu=MenuBar)
 
 #延迟测试
 
+
+
 def Delay_Test():
-    print('Delay_Test:',Server_List_Select_combox.get())
+    global auto_proxy
+    global GLOBAL_Configuration
+    
+    if auto_proxy == 1:
+        #自动化延迟测试
+        ServerList=GLOBAL_Configuration.get_server_list_from_config()
+        Recording_Insertion('[+] 使用自动化延迟测试...\n','normal')
+        Recording_Insertion('[!] 测试开始..请勿关闭窗口...\n','warning')
+        for i in ServerList:
+            Auto_Delay_obj=Delay_Test_Module(i[0],i[1])
+            auto_delay=Auto_Delay_obj.UDP_AVG_RTT()
+            if auto_delay == -1:
+                Recording_Insertion('[!] '+i[0]+':'+str(i[1])+' 无响应\n','error')
+            else:
+                Recording_Insertion('[+] '+i[0]+':'+str(i[1])+' '+str(auto_delay)+'ms \n','success')
+    else:
+        Recording_Insertion('[+] 使用单节点延迟测试...\n','normal')
+        Recording_Insertion('[%] 正在测试: '+Server_List_Select_combox.get()+'\n','blue')
+        temp=Server_List_Select_combox.get()
+        tem_server=temp.split(':')
+        Delay_obj=Delay_Test_Module(tem_server[0],eval(tem_server[1]))
+        udp_delay=Delay_obj.UDP_AVG_RTT()
+        if udp_delay == -1:
+            Recording_Insertion('[!] '+temp+' 无响应\n','error')
+            pass
+        Recording_Insertion(udp_delay,'success')
+        Recording_Insertion('\n','success')
+        
+        #手动延迟测试
+    #print('Delay_Test:',Server_List_Select_combox.get())
+    #Recording_Insertion('Delay_Test:'+Server_List_Select_combox.get(),'blue')
 
 Delay_Test_Button=tk.Button(Connection_Manager_Frame,text='延迟测试',font=ft,width=8,height=3,padx=4,pady=4,command=Delay_Test)
 Delay_Test_Button.grid(column=1,row=0,rowspan=2)
 
 #连接
+
+
 def Connect():
+    global CONNECT_STATUS
     print('Try Connect:',Server_List_Select_combox.get())
+    Recording_Insertion('Try Connect:'+Server_List_Select_combox.get()+'\n','blue')
+    CONNECT_STATUS = 1
+
+
 
 Connection_Button=tk.Button(Connection_Manager_Frame,text='连接',font=ft,width=8,height=3,padx=4,pady=4,command=Connect)
 Connection_Button.grid(column=2,row=0,rowspan=2)
+
 
 
 #---------------Status---------------------#
@@ -305,14 +349,30 @@ Connect_Status_Lable.grid(column=0,row=0)
 
 Conn_status_var=tk.StringVar()
 #Conn_status_var.set('    连接成功   ')
-
-
-#Conn_status_var.set('    连接错误   ')
-Conn_status_var.set('    未连接     ')
 #Conn_status_var.set('   正在连接... ')
-Conn_label=tk.Label(Connect_Status_Frame,textvariable=Conn_status_var,font=status_ft,fg='green',padx=10)
+#Conn_status_var.set('    连接错误   ')
+
+Conn_status_var.set('    未连接     ')
+Conn_label=tk.Label(Connect_Status_Frame,textvariable=Conn_status_var,font=status_ft,fg='orange',padx=10)
 Conn_label.grid(column=1,row=0,sticky='w')
 
+def Conn_Status_Grid():
+    global Conn_label
+    global Connect_Status_Frame
+    global status_ft
+    global CONNECT_STATUS
+    Conn_label.destroy()
+    if CONNECT_STATUS == 0:
+        Conn_status_var.set('    未连接     ')
+        Conn_label=tk.Label(Connect_Status_Frame,textvariable=Conn_status_var,font=status_ft,fg='orange',padx=10)
+        Conn_label.grid(column=1,row=0,sticky='w')
+    elif CONNECT_STATUS == 1:
+        Conn_status_var.set('    已连接     ')
+        Conn_label=tk.Label(Connect_Status_Frame,textvariable=Conn_status_var,font=status_ft,fg='green',padx=10)
+        Conn_label.grid(column=1,row=0,sticky='w')
+
+
+    MainWindow.after(1000,Conn_Status_Grid)
 
 #--------------日志-------------------#
 
@@ -343,12 +403,9 @@ def Recording_Insertion(text,_type):
     global record_Text
     record_Text.configure(state=tk.NORMAL)
     record_Text.insert(tk.END,text,_type)
-    record_Text.insert(tk.END,'\n',_type)
+    #record_Text.insert(tk.END,'\n',_type)
     record_Text.configure(state='disabled')
     
-Recording_Insertion('hello','error')
-Recording_Insertion('test','blue')
-Recording_Insertion('huge_test','success')
 
 scroll=tk.Scrollbar(record_frame)
 scroll['command']=record_Text.yview
@@ -359,6 +416,7 @@ scroll.grid(column=1,row=0,sticky=tk.S + tk.W + tk.E + tk.N)
 
 
 MainWindow.after(1000,Server_Chosen_Cobox)
+MainWindow.after(1000,Conn_Status_Grid)
 
 MainWindow.mainloop()
 
