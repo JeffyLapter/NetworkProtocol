@@ -289,31 +289,47 @@ MainWindow.config(menu=MenuBar)
 def Delay_Test():
     global auto_proxy
     global GLOBAL_Configuration
-    
+    DELAY_LIST=[]
     if auto_proxy == 1:
         #自动化延迟测试
         ServerList=GLOBAL_Configuration.get_server_list_from_config()
         Recording_Insertion('[+] 使用自动化延迟测试...\n','normal')
         Recording_Insertion('[!] 测试开始..请勿关闭窗口...\n','warning')
+        
         for i in ServerList:
             Auto_Delay_obj=Delay_Test_Module(i[0],i[1])
             auto_delay=Auto_Delay_obj.UDP_AVG_RTT()
             if auto_delay == -1:
                 Recording_Insertion('[!] '+i[0]+':'+str(i[1])+' 无响应\n','error')
             else:
+                DELAY_LIST.append([i,auto_delay])
                 Recording_Insertion('[+] '+i[0]+':'+str(i[1])+' '+str(auto_delay)+'ms \n','success')
     else:
         Recording_Insertion('[+] 使用单节点延迟测试...\n','normal')
         Recording_Insertion('[%] 正在测试: '+Server_List_Select_combox.get()+'\n','blue')
         temp=Server_List_Select_combox.get()
         tem_server=temp.split(':')
-        Delay_obj=Delay_Test_Module(tem_server[0],eval(tem_server[1]))
+        tem_server[1]=eval(tem_server[1])
+        Delay_obj=Delay_Test_Module(tem_server[0],tem_server[1])
         udp_delay=Delay_obj.UDP_AVG_RTT()
         if udp_delay == -1:
             Recording_Insertion('[!] '+temp+' 无响应\n','error')
             pass
         Recording_Insertion(udp_delay,'success')
         Recording_Insertion('\n','success')
+        DELAY_LIST.append([tem_server,udp_delay])
+    
+    #print(DELAY_LIST)
+    #DELAY_LIST.append([['39.106.97.149', '8767'], 5.14153712646])
+    #DELAY_LIST.append([['39.106.47.149', '4767'], 9.14153712646])
+    fastest_one=DELAY_LIST[0]
+    for p in DELAY_LIST:
+        if p[1]<fastest_one[1]:
+            fastest_one=p
+        else:
+            pass
+    return fastest_one
+            
         
         #手动延迟测试
     #print('Delay_Test:',Server_List_Select_combox.get())
@@ -327,9 +343,19 @@ Delay_Test_Button.grid(column=1,row=0,rowspan=2)
 
 def Connect():
     global CONNECT_STATUS
-    print('Try Connect:',Server_List_Select_combox.get())
-    Recording_Insertion('Try Connect:'+Server_List_Select_combox.get()+'\n','blue')
+    global auto_proxy
+    TARGET=Delay_Test()
+    targetip=TARGET[0][0]
+    targetport=TARGET[0][1]
+    #print('Try Connect:',targetip,':',str(targetport))
+    
+    
+    Recording_Insertion('Try Connect:'+targetip+':'+str(targetport)+'\n','blue')
+    #success
     CONNECT_STATUS = 1
+
+    #failed
+    #CONNECT_STATUS = -1
 
 
 
@@ -369,6 +395,10 @@ def Conn_Status_Grid():
     elif CONNECT_STATUS == 1:
         Conn_status_var.set('    已连接     ')
         Conn_label=tk.Label(Connect_Status_Frame,textvariable=Conn_status_var,font=status_ft,fg='green',padx=10)
+        Conn_label.grid(column=1,row=0,sticky='w')
+    elif CONNECT_STATUS == -1:
+        Conn_status_var.set('    连接错误   ')
+        Conn_label=tk.Label(Connect_Status_Frame,textvariable=Conn_status_var,font=status_ft,fg='red',padx=10)
         Conn_label.grid(column=1,row=0,sticky='w')
 
 
