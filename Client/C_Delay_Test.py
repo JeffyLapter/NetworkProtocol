@@ -4,8 +4,8 @@ import time
 
 
 
-HOST='39.106.97.149'
-PORT=8777
+HOST='192.168.75.139'
+PORT=8877
 BUFSIZE=1024
 Totaltime=0.0
 Packet=10

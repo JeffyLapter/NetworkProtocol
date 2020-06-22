@@ -4,7 +4,7 @@ from time import ctime
 
 
 HOST = '0.0.0.0'
-PORT = 8777
+PORT = 8877
 BUFSIZE = 1024
 ADDR = (HOST, PORT)
 udpSerSock = socket(AF_INET, SOCK_DGRAM)
