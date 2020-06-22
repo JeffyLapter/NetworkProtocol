@@ -2,6 +2,7 @@ from socket import *
 import json
 from hashlib import *
 import time
+import re
 class Proxy:
     def __init__(self,*args):
         self.id = args[0]
@@ -30,16 +31,12 @@ class Proxy_Request:
         self.des_port = bin_to_str_port(message[85:101])
 
 def bin_to_str_ip(b_ip):
-    str_ip=''
-    f='0b'
-    for i in range(32):
-        f=f+b_ip[i]
-        if i%8==7:
-            str_ip=str_ip+str(int(f,2))
-            if i!=31:
-                str_ip=str_ip+'.'
-            f='0b'
-    return str_ip
+    e=re.findall('........',b_ip)
+    ipstrlist=[]
+    for i in e:
+        ipstrlist.append(str(int(i,2)))
+    ipstr='.'.join(ipstrlist)
+    return ipstr
 
 def bin_to_str_port(b_port):
     str_port='0b'+b_port

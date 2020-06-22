@@ -21,7 +21,7 @@ class Delay_Test_Module:
     
     def UDP_AVG_RTT(self):
         Total_time=0.0
-        for i in range(1):
+        for i in range(10):
             data=bytes(self.Get_randstring(),encoding='utf-8')
             start_time=time.time()
             try:
@@ -32,7 +32,7 @@ class Delay_Test_Module:
             end_time=time.time()
             use_time_single=(end_time-start_time)*1000
             Total_time+=use_time_single
-        self.RTT=Total_time/1/2.0
+        self.RTT=Total_time/10/2.0
         return self.RTT
     
 #TEST=Delay_Test_Module('39.106.97.149',8777)

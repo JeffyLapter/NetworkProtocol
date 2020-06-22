@@ -615,7 +615,4 @@ MainWindow.after(1000,Conn_Status_Grid)
 
 MainWindow.mainloop()
 
-'''
-要解决的问题：
-json写入，修改，自动化udp选路模块
-'''
+
