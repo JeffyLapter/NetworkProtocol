@@ -99,17 +99,17 @@ def receive():
     res_message = clientSocket.recv(53).decode()
     res = Proxy_Response(res_message)
     if res.type=='000':
-        #print('['+time.asctime(time.localtime(time.time()))+'] '+'Response form Proxy '+'status: Connect Ok.\n','success')
         Recording_Insertion('['+time.asctime(time.localtime(time.time()))+'] '+'Response form Proxy '+'status: Connect Ok.\n','success')
     elif res.type=='001':
-        #print(('['+time.asctime(time.localtime(time.time()))+'] '+'Response form Proxy '+'status: No Response.\n','error'))
-        Recording_Insertion('['+time.asctime(time.localtime(time.time()))+'] '+'Response form Proxy '+'status: No Response.\n','error')
+        Recording_Insertion('['+time.asctime(time.localtime(time.time()))+'] '+'Response form Proxy '+'status: Connection Failed.\n','error')
+    elif res.type=='010':
+        Recording_Insertion('['+time.asctime(time.localtime(time.time()))+'] '+'Response form Proxy '+'status: Message Forwarding Succeed.\n','success')
+    elif res.type=='011':
+        Recording_Insertion('['+time.asctime(time.localtime(time.time()))+'] '+'Response form Proxy '+'status: Message Forwarding Failed.\n','success')
     elif res.type=='100':
-        #print('['+time.asctime(time.localtime(time.time()))+'] '+'Response form Proxy '+'status: Disconnect Ok.\n','success')
         Recording_Insertion('['+time.asctime(time.localtime(time.time()))+'] '+'Response form Proxy '+'status: Disconnect Ok.\n','success')
     elif res.type=='101':
-        #print('['+time.asctime(time.localtime(time.time()))+'] '+'Response form Proxy '+'status: No Response, Disconnect Error.\n','error')
-        Recording_Insertion('['+time.asctime(time.localtime(time.time()))+'] '+'Response form Proxy '+'status: No Response, Disconnect Error.\n','error')
+        Recording_Insertion('['+time.asctime(time.localtime(time.time()))+'] '+'Response form Proxy '+'status: Disconnection Failed, Keep Connection.\n','error')
     return res.type
 #send message
 def send_message(information):
