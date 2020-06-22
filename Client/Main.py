@@ -22,10 +22,10 @@ class Client_Request:
     def __init__(self,f,con_type,client_ip,client_port,des_ip,des_port):
         self.f = f
         self.con_type = con_type
-        self.client_ip = str_to_bin_ip(client_ip)
-        self.client_port = str_to_bin_port(client_port)
-        self.des_ip = str_to_bin_ip(des_ip)
-        self.des_port = str_to_bin_port(des_port)
+        self.client_ip = client_ip
+        self.client_port = client_port
+        self.des_ip = des_ip
+        self.des_port = des_port
     def set_f(self,F):
         self.f = F
 
@@ -39,28 +39,27 @@ class Proxy_Response:
 class Basic_information:
     def __init__(self,con_type,client_ip,client_port,proxy_server,proxy_port,des_ip,des_port):
         self.con_type = con_type
-        self.client_ip = str_to_bin_ip(client_ip)
-        self.client_port = str_to_bin_port(client_port)
-        self.proxy_server = str_to_bin_ip(proxy_server)
-        self.proxy_port = str_to_bin_port(proxy_port)
-        self.des_ip = str_to_bin_ip(des_ip)
-        self.des_port = str_to_bin_port(des_port)
+        self.client_ip = client_ip
+        self.client_port = client_port
+        self.proxy_server = proxy_server
+        self.proxy_port = proxy_port
+        self.des_ip = des_ip
+        self.des_port = des_port
     
+
 def bin_to_str_ip(b_ip):
-    str_ip=''
-    f='0b'
-    for i in range(32):
-        f=f+b_ip[i]
-        if i%8==7:
-            str_ip=str_ip+str(int(f,2))
-            if i!=31:
-                str_ip=str_ip+'.'
-            f='0b'
-    return str_ip
+    e=re.findall('........',b_ip)
+    ipstrlist=[]
+    for i in e:
+        ipstrlist.append(str(int(i,2)))
+    ipstr='.'.join(ipstrlist)
+    return ipstr
+
 
 def bin_to_str_port(b_port):
     str_port='0b'+b_port
-    return int(str_port,2)
+    x=int(str_port,2)
+    return x
 
 def str_to_bin_ip(str_ip):
     f=''
@@ -69,8 +68,9 @@ def str_to_bin_ip(str_ip):
         if i!='.':
             f=f+i
         else:
-            b_ip=b_ip+'{:08b}'.format(int(f))
+            b_ip=b_ip+bin(int(f))[2:].zfill(8)
             f=''
+    b_ip=b_ip+bin(int(f))[2:].zfill(8)
     return b_ip
 
 def str_to_bin_port(str_port):
@@ -79,23 +79,19 @@ def str_to_bin_port(str_port):
 
 
 #请求代理连接
-def connect(clientSocket,information):
-    #from Main import Recording_Insertion
+def connect(information):
     try:
-        clientSocket.bind((information.client_ip,information.client_port))
+        #clientSocket.bind((information.client_ip,information.client_port))
         clientSocket.connect((information.proxy_server,information.proxy_port))
     except Exception:
         Recording_Insertion('['+time.asctime(time.localtime(time.time()))+'] '+'Connect to Proxy '+' status: Connect Error.\n','error')
-        return -1
     else:
         Recording_Insertion('['+time.asctime(time.localtime(time.time()))+'] '+'Connect to Proxy '+' status: Request for Proxy OK.\n','success')
-        req = Client_Request('00',information.con_type,information.client_ip,information.client_port,information.des_ip,information.des_port)
+        req = Client_Request('00',information.con_type, str_to_bin_ip(information.client_ip),str_to_bin_port(information.client_port),str_to_bin_ip(information.des_ip),str_to_bin_port(information.des_port))
         message = req.f+req.con_type+req.client_ip+req.client_port+req.des_ip+req.des_port
-        clientSocket.send(message)
-
+        clientSocket.send(message.encode())
 #接收代理响应信息
-def receive(clientSocket):
-    #from Main import Recording_Insertion
+def receive():
     res_message = clientSocket.recv(53)
     res = Proxy_Response(res_message)
     if res.type=='000':
@@ -108,72 +104,89 @@ def receive(clientSocket):
         Recording_Insertion('['+time.asctime(time.localtime(time.time()))+'] '+'Response form Proxy '+'status: No Response, Disconnect Error.\n','error')
     return res.type
 #send message
-def send_message(clientSocket,information):
-    #from Main import Recording_Insertion
+def send_message(information):
     Recording_Insertion('Please enter the script input test statement, the target server will automatically convert to uppercase...\n','blue')
-    req = Client_Request('10',information.con_type,information.client_ip,information.client_port,information.des_ip,information.des_port)
+    req = Client_Request('10',information.con_type,str_to_bin_ip(information.client_ip),str_to_bin_port(information.client_port),str_to_bin_ip(information.des_ip),str_to_bin_port(information.des_port))
+    
     message = req.f+req.con_type+req.client_ip+req.client_port+req.des_ip+req.des_port
+    print(len(message))
     while True:
         sentence=input('Enter your test sentence, it will be modified (Enter #01 means disconnect proxy): ')
         if sentence=='#01':
             break
         else:
-            clientSocket.send(message+sentence.encode())
-            modifiedSentence = clientSocket.recv()
+            mes = message+sentence
+            clientSocket.send(mes.encode())
+            modifiedSentence = clientSocket.recv(1024).decode()
 
-            print('From Server:', modifiedSentence[53:].decode())
+            print('From Server:', modifiedSentence[53:])
 #关闭代理
-def disconnect(clientSocket,information):
-    #from Main import Recording_Insertion
-    req = Client_Request('01',information.con_type,information.client_ip,information.client_port,information.des_ip,information.des_port)
-    message = req.f+req.con_type+req.client_ip+req.client_port+req.des_ip+req.des_port
-    clientSocket.send(message)
-    Recording_Insertion('['+time.asctime(time.localtime(time.time()))+'] '+'Disconnect to Proxy '+'status: Request for Proxy OK.\n','success')
+def disconnect(information):
+        while True:
+            req = Client_Request('01',information.con_type,str_to_bin_ip(information.client_ip),str_to_bin_port(information.client_port),str_to_bin_ip(information.des_ip),str_to_bin_port(information.des_port))
+            message = req.f+req.con_type+req.client_ip+req.client_port+req.des_ip+req.des_port
+            clientSocket.send(message.encode())
+            Recording_Insertion('['+time.asctime(time.localtime(time.time()))+'] '+'Disconnect to Proxy '+' status: Request for Proxy OK.\n','success')
 
-    res_message = clientSocket.recv(53)
-    res = Proxy_Response(res_message)
+            #res_message = clientSocket.recv(53).decode()
+            #print(res_message)
+            #print(res_message[5:37],bin_to_str_ip(res_message[5:37]))
+            #res = Proxy_Response(res_message)
+            x=receive()
+            if x=='100':
+                clientSocket.close()
+                return 1
 
-    if receive(clientSocket)=='100':
-        clientSocket.close()
-        return 1
-    else:
-        return -1
 
 #
 def work(proxy_server,proxy_port):
     #
     # proxy_server = ''
     # proxy_port = 1234
+#proxy_server = '192.168.120.129'
+#proxy_port = 8877
+
     client_name = getfqdn(gethostname())
     client_ip = gethostbyname(client_name)
     client_port = 8080
-    Recording_Insertion('Please enter the script to input the configuration information...\n','blue')
+    print('Please enter the script to input the configuration information...\n','blue')
+    global clientSocket
     clientSocket = socket(AF_INET, SOCK_STREAM)
+    '''
     while True:
-            con_type = input('Enter your connect type (TCP/UDP): ')
-            if con_type=='TCP' or con_type=='tcp':
-                con_type = '000'
-                break
-            elif con_type=='UDP' or con_type=='udp':
-                con_type = '001'
-                break
-            else:
-                print('Error. Please enter again.')
+        con_type = input('Enter your connect type (TCP/UDP): ')
+        if con_type=='TCP' or con_type=='tcp':
+            con_type = '000'
+            break
+        elif con_type=='UDP' or con_type=='udp':
+            con_type = '001'
+            break
+        else:
+            print('Error. Please enter again.')
     address = input('Enter your destination address (xx.xx.xx.xx:xx): ')
     des_ip = address.split(':')[0]
     des_port = int(address.split(':')[1])
+    '''
+    con_type = '000'
+    des_ip = '192.168.120.128'
+    des_port = 8803
+
     information=Basic_information(con_type,client_ip,client_port,proxy_server,proxy_port,des_ip,des_port)
-    connect(clientSocket,information)
-    if receive(clientSocket)=='000':
-        send_message(clientSocket,information)
-        f=disconnect(clientSocket,information)
+    connect(information)
+    res_message = clientSocket.recv(53).decode()
+
+
+    res = Proxy_Response(res_message)
+    #print(res.type)
+    if res.type=='000':
+        send_message(information)
+        f=disconnect(information)
         if f==-1:
             return -1
         else:
             return 1
     else:
         return -1
-
 
 class Config_Loader:
     def __init__(self,path):#path requires a Config file which defined at the begining of this file

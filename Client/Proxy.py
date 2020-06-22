@@ -29,6 +29,7 @@ class Basic_information:
         self.des_ip = des_ip
         self.des_port = des_port
     
+
 def bin_to_str_ip(b_ip):
     e=re.findall('........',b_ip)
     ipstrlist=[]
