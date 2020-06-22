@@ -12,7 +12,7 @@ udpSerSock.bind(ADDR)
 while True:
     print('waiting for message...')
     data, addr = udpSerSock.recvfrom(BUFSIZE)
-    rpldata=bytes('ACCEPT [%s] %s' % (ctime(), data),encoding='utf-8')
+    rpldata=bytes('ACCEPT [%s] %s' % (ctime(), data))
     udpSerSock.sendto(rpldata, addr)
     print('received from %s >> %s' % (addr, data))
 udpSerSock.close()
